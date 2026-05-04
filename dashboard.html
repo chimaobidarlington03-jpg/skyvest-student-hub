@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Skyvest Dashboard</title>
+</head>
+<body>
+
+<h2>Skyvest Dashboard</h2>
+
+<p>Balance: ₦<span id="balance">0</span></p>
+<p>Savings: ₦<span id="savings">0</span></p>
+
+<button onclick="earn()">Earn ₦100</button>
+<button onclick="save()">Save ₦100</button>
+
+<br><br>
+
+<h3>Request Support</h3>
+<input type="number" id="supportAmount" placeholder="Amount"><br><br>
+<input type="text" id="supportReason" placeholder="Reason"><br><br>
+<button onclick="requestSupport()">Submit Request</button>
+
+<br><br>
+
+<!-- 💰 INTEREST SYSTEM -->
+<h3>Interest System</h3>
+<button onclick="applyInterest()">Apply Weekly Interest (10%)</button>
+
+<br><br>
+
+<h3>Transaction History</h3>
+<div id="history"></div>
+
+<br>
+
+<button onclick="goAdmin()">Admin Panel</button>
+
+<br><br>
+<button onclick="logout()">Logout</button>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyADD6zb-bPiW1zUd3k6luEe2Bz7_n5xPBg",
+  authDomain: "skyvest-student-hub.firebaseapp.com",
+  projectId: "skyvest-student-hub",
+  storageBucket: "skyvest-student-hub.firebasestorage.app",
+  messagingSenderId: "941265501695",
+  appId: "1:941265501695:web:6aa43e2e09caacd335bbca"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser = null;
+
+auth.onAuthStateChanged(user => {
+  if(user){
+    currentUser = user;
+    loadUser(user.uid);
+    loadHistory();
+  } else {
+    window.location.href = "login.html";
+  }
+});
+
+function loadUser(uid){
+  db.collection("users").doc(uid).get().then(doc => {
+    if(doc.exists){
+      document.getElementById("balance").innerText = doc.data().balance;
+      document.getElementById("savings").innerText = doc.data().savings;
+    }
+  });
+}
+
+function earn(){
+  let ref = db.collection("users").doc(currentUser.uid);
+
+  ref.get().then(doc => {
+    let newBalance = doc.data().balance + 100;
+
+    ref.update({ balance: newBalance });
+
+    db.collection("transactions").add({
+      userId: currentUser.uid,
+      type: "Earn",
+      amount: 100,
+      date: new Date()
+    });
+
+    document.getElementById("balance").innerText = newBalance;
+    loadHistory();
+  });
+}
+
+function save(){
+  let ref = db.collection("users").doc(currentUser.uid);
+
+  ref.get().then(doc => {
+    let balance = doc.data().balance;
+    let savings = doc.data().savings;
+
+    if(balance >= 100){
+      ref.update({
+        balance: balance - 100,
+        savings: savings + 100
+      });
+
+      db.collection("transactions").add({
+        userId: currentUser.uid,
+        type: "Save",
+        amount: 100,
+        date: new Date()
+      });
+
+      document.getElementById("balance").innerText = balance - 100;
+      document.getElementById("savings").innerText = savings + 100;
+
+      loadHistory();
+    } else {
+      alert("Not enough balance");
+    }
+  });
+}
+
+function requestSupport(){
+  let amount = document.getElementById("supportAmount").value;
+  let reason = document.getElementById("supportReason").value;
+
+  if(amount === "" || reason === ""){
+    alert("Fill all fields");
+    return;
+  }
+
+  db.collection("support_requests").add({
+    userId: currentUser.uid,
+    amount: Number(amount),
+    reason: reason,
+    status: "pending",
+    date: new Date()
+  });
+
+  db.collection("transactions").add({
+    userId: currentUser.uid,
+    type: "Support Request",
+    amount: Number(amount),
+    date: new Date()
+  });
+
+  alert("Request submitted");
+
+  document.getElementById("supportAmount").value = "";
+  document.getElementById("supportReason").value = "";
+
+  loadHistory();
+}
+
+function applyInterest(){
+  let ref = db.collection("users").doc(currentUser.uid);
+
+  ref.get().then(doc => {
+    let savings = doc.data().savings || 0;
+
+    let interest = savings * 0.10; // 10% interest
+    let newSavings = savings + interest;
+
+    ref.update({
+      savings: newSavings,
+      lastInterest: new Date()
+    });
+
+    db.collection("transactions").add({
+      userId: currentUser.uid,
+      type: "Interest Earned",
+      amount: interest,
+      date: new Date()
+    });
+
+    alert("Interest added: ₦" + interest);
+
+    loadUser(currentUser.uid);
+    loadHistory();
+  });
+}
+
+function loadHistory(){
+  let container = document.getElementById("history");
+  container.innerHTML = "";
+
+  db.collection("transactions")
+  .where("userId", "==", currentUser.uid)
+  .get()
+  .then(snapshot => {
+
+    snapshot.forEach(doc => {
+      let data = doc.data();
+
+      container.innerHTML += `
+        <div style="border:1px solid gray; padding:5px; margin:5px;">
+          <b>${data.type}</b> - ₦${data.amount}
+        </div>
+      `;
+    });
+
+  });
+}
+
+function goAdmin(){
+  let email = currentUser.email ? currentUser.email.toLowerCase() : "";
+
+  if(email === "skyvestcapital.ng@gmail.com"){
+    window.location.href = "admin.html";
+  } else {
+    alert("Access denied");
+  }
+}
+
+function logout(){
+  auth.signOut().then(()=>{
+    window.location.href = "login.html";
+  });
+}
+</script>
+
+</body>
+</html>

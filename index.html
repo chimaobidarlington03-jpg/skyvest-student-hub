@@ -1,23 +1,152 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Login - Skyvest</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Skyvest Login</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, sans-serif;
+}
+
+body{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  background:linear-gradient(135deg,#d8ffe2,#b8f5c7);
+}
+
+.container{
+  position:relative;
+  width:900px;
+  max-width:95%;
+  height:550px;
+  background:#fff;
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 15px 40px rgba(0,0,0,0.15);
+}
+
+.form-box{
+  position:absolute;
+  top:0;
+  width:50%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:40px;
+  transition:0.7s ease-in-out;
+}
+
+.login-box{ left:0; }
+.register-box{ left:100%; }
+
+.container.active .login-box{ left:-100%; }
+.container.active .register-box{ left:50%; }
+
+h2{
+  margin-bottom:20px;
+  color:#1d7a35;
+  font-size:32px;
+}
+
+input{
+  width:100%;
+  padding:14px;
+  margin:10px 0;
+  border:2px solid #c8f0d3;
+  border-radius:12px;
+  outline:none;
+}
+
+button{
+  margin-top:15px;
+  padding:14px 35px;
+  border:none;
+  border-radius:30px;
+  cursor:pointer;
+  background:#35b24a;
+  color:white;
+  font-weight:bold;
+}
+
+button:hover{ background:#278a39; }
+
+.overlay{
+  position:absolute;
+  top:0;
+  left:50%;
+  width:50%;
+  height:100%;
+  background:linear-gradient(135deg,#72e39f,#35b24a);
+  color:white;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:40px;
+  transition:0.7s ease-in-out;
+}
+
+.container.active .overlay{ left:0; }
+
+.overlay h2{ color:white; font-size:38px; }
+
+.switch-btn{
+  background:transparent;
+  border:2px solid white;
+  margin-top:20px;
+}
+
+.message{
+  margin-top:10px;
+  font-size:14px;
+  color:red;
+}
+</style>
 </head>
+
 <body>
 
-<h2>Login</h2>
+<div class="container" id="container">
 
-<input type="email" id="email" placeholder="Email"><br><br>
-<input type="password" id="password" placeholder="Password"><br><br>
+  <!-- LOGIN -->
+  <div class="form-box login-box">
+    <h2>Login</h2>
+    <input type="email" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginPass" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <p class="message" id="loginMsg"></p>
+  </div>
 
-<button onclick="login()">Login</button>
+  <!-- REGISTER -->
+  <div class="form-box register-box">
+    <h2>Register</h2>
+    <input type="text" id="regUser" placeholder="Username">
+    <input type="email" id="regEmail" placeholder="Email">
+    <input type="password" id="regPass" placeholder="Password">
+    <button onclick="register()">Register</button>
+    <p class="message" id="regMsg"></p>
+  </div>
 
-<br><br>
+  <!-- OVERLAY -->
+  <div class="overlay">
+    <h2>Welcome</h2>
+    <p>Register first before login</p>
+    <button class="switch-btn" onclick="toggle()">Switch</button>
+  </div>
 
-<!-- 🔐 Forgot Password -->
-<button onclick="resetPassword()">Forgot Password?</button>
+</div>
 
-<!-- Firebase -->
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -26,49 +155,57 @@
 const firebaseConfig = {
   apiKey: "AIzaSyADD6zb-bPiW1zUd3k6luEe2Bz7_n5xPBg",
   authDomain: "skyvest-student-hub.firebaseapp.com",
-  projectId: "skyvest-student-hub",
-  storageBucket: "skyvest-student-hub.firebasestorage.app",
-  messagingSenderId: "941265501695",
-  appId: "1:941265501695:web:6aa43e2e09caacd335bbca"
+  projectId: "skyvest-student-hub"
 };
 
 firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+.catch(err => console.log(err));
+const db = firebase.firestore();
 
-function login(){
-  let email = document.getElementById("email").value;
-  let password = document.getElementById("password").value;
+const container = document.getElementById("container");
 
-  if(email === "" || password === ""){
-    alert("Fill all fields");
-    return;
-  }
+function toggle(){
+  container.classList.toggle("active");
+}
 
-  auth.signInWithEmailAndPassword(email, password)
-  .then(() => {
-    alert("Login successful");
-    window.location.href = "dashboard.html";
+/* REGISTER */
+function register(){
+  let username = document.getElementById("regUser").value;
+  let email = document.getElementById("regEmail").value;
+  let pass = document.getElementById("regPass").value;
+
+  auth.createUserWithEmailAndPassword(email, pass)
+  .then(userCred => {
+
+    db.collection("users").doc(userCred.user.uid).set({
+      email: email,
+      username: username,
+      balance: 0,
+      savings: 0
+    });
+
+    document.getElementById("regMsg").style.color = "green";
+    document.getElementById("regMsg").innerText = "Registered!";
   })
-  .catch(err => {
-    alert("Login failed: " + err.message);
+  .catch(err=>{
+    document.getElementById("regMsg").innerText = err.message;
   });
 }
 
-function resetPassword(){
-  let email = document.getElementById("email").value;
+/* LOGIN */
+function login(){
+  let email = document.getElementById("loginEmail").value;
+  let pass = document.getElementById("loginPass").value;
 
-  if(!email){
-    alert("Enter your email first");
-    return;
-  }
-
-  auth.sendPasswordResetEmail(email)
-  .then(() => {
-    alert("Password reset email sent");
+  auth.signInWithEmailAndPassword(email, pass)
+  .then(()=>{
+    window.location.href = "dashboard.html";
   })
-  .catch(err => {
-    alert("Error: " + err.message);
+  .catch(err=>{
+    document.getElementById("loginMsg").innerText = err.message;
   });
 }
 </script>

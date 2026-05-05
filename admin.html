@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Skyvest Admin Panel</title>
+  <title>Admin Panel</title>
 </head>
 <body>
 
-<h2>Skyvest Admin Dashboard</h2>
+<h2>Admin Panel</h2>
 
+<p id="status">Loading...</p>
+
+<h3>Support Requests</h3>
 <div id="requests"></div>
 
-<!-- Firebase -->
+<button onclick="logout()">Logout</button>
+
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -18,10 +22,7 @@
 const firebaseConfig = {
   apiKey: "AIzaSyADD6zb-bPiW1zUd3k6luEe2Bz7_n5xPBg",
   authDomain: "skyvest-student-hub.firebaseapp.com",
-  projectId: "skyvest-student-hub",
-  storageBucket: "skyvest-student-hub.firebasestorage.app",
-  messagingSenderId: "941265501695",
-  appId: "1:941265501695:web:6aa43e2e09caacd335bbca"
+  projectId: "skyvest-student-hub"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -29,73 +30,66 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// your admin email
-const adminEmail = "skyvestcapital.ng@gmail.com";
+const ADMIN_EMAIL = "skyvestcapital.ng@gmail.com";
 
+// 🔥 AUTH CHECK
 auth.onAuthStateChanged(user => {
-  if(user){
-    if(user.email.toLowerCase() === adminEmail){
-      loadRequests();
-    } else {
-      alert("Access denied");
-      window.location.href = "dashboard.html";
-    }
-  } else {
-    window.location.href = "login.html";
+
+  if(!user){
+    window.location.href = "index.html";
+    return;
   }
+
+  if(user.email !== ADMIN_EMAIL){
+    document.body.innerHTML = "<h2>Access Denied</h2>";
+    return;
+  }
+
+  document.getElementById("status").innerText = "Welcome Admin: " + user.email;
+
+  loadRequests();
 });
 
-async function loadRequests(){
-  let container = document.getElementById("requests");
-  container.innerHTML = "";
+// 🔥 LOAD SUPPORT REQUESTS
+function loadRequests(){
+  const container = document.getElementById("requests");
+  container.innerHTML = "Loading...";
 
-  let snapshot = await db.collection("support_requests").get();
+  db.collection("support_requests")
+  .get()
+  .then(snapshot => {
 
-  for(let doc of snapshot.docs){
-    let data = doc.data();
+    if(snapshot.empty){
+      container.innerHTML = "<p>No requests found</p>";
+      return;
+    }
 
-    // get user email from users collection
-    let userDoc = await db.collection("users").doc(data.userId).get();
-    let userEmail = userDoc.exists ? userDoc.data().email : "Unknown";
+    container.innerHTML = "";
 
-    container.innerHTML += `
-      <div style="border:1px solid #000; padding:10px; margin:10px;">
-        <p><b>User:</b> ${userEmail}</p>
-        <p><b>Amount:</b> ₦${data.amount}</p>
-        <p><b>Reason:</b> ${data.reason}</p>
-        <p><b>Status:</b> ${data.status}</p>
+    snapshot.forEach(doc => {
+      let data = doc.data();
 
-        <button onclick="approve('${doc.id}', '${data.userId}', ${data.amount})">Approve</button>
-        <button onclick="reject('${doc.id}')">Reject</button>
-      </div>
-    `;
-  }
-}
-
-function approve(id, userId, amount){
-  let ref = db.collection("users").doc(userId);
-
-  ref.get().then(doc => {
-    let newBalance = doc.data().balance + amount;
-
-    ref.update({ balance: newBalance });
-
-    db.collection("support_requests").doc(id).update({
-      status: "approved"
+      container.innerHTML += `
+        <div style="border:1px solid #ccc; padding:10px; margin:10px;">
+          <p><b>User:</b> ${data.userId}</p>
+          <p><b>Amount:</b> ₦${data.amount}</p>
+          <p><b>Reason:</b> ${data.reason}</p>
+          <p><b>Status:</b> ${data.status}</p>
+        </div>
+      `;
     });
 
-    alert("Approved & money sent");
-    loadRequests();
+  })
+  .catch(err => {
+    console.log(err);
+    container.innerHTML = "Error loading requests";
   });
 }
 
-function reject(id){
-  db.collection("support_requests").doc(id).update({
-    status: "rejected"
+function logout(){
+  auth.signOut().then(()=>{
+    window.location.href = "index.html";
   });
-
-  alert("Request rejected");
-  loadRequests();
 }
 </script>
 

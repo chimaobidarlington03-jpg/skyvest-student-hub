@@ -1,97 +1,76 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Skyvest Student Hub</title>
-  <style>
-    body {
-      font-family: Arial;
-      background: #0f172a;
-      color: white;
-      margin: 0;
-    }
-
-    .header {
-      background: #16a34a;
-      padding: 15px;
-      text-align: center;
-      font-size: 20px;
-    }
-
-    .container {
-      padding: 20px;
-    }
-
-    .card {
-      background: #1e293b;
-      padding: 15px;
-      margin: 10px 0;
-      border-radius: 10px;
-    }
-
-    button {
-      padding: 10px;
-      margin: 5px;
-      border: none;
-      background: #16a34a;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-  </style>
+  <title>Login - Skyvest</title>
 </head>
-
 <body>
 
-<div class="header">Skyvest Student Hub</div>
+<h2>Login</h2>
 
-<div class="container">
+<input type="email" id="email" placeholder="Email"><br><br>
+<input type="password" id="password" placeholder="Password"><br><br>
 
-  <div class="card">
-    <h3>Wallet Balance</h3>
-    <p id="balance">₦1000</p>
-  </div>
+<button onclick="login()">Login</button>
 
-  <div class="card">
-    <h3>Savings</h3>
-    <p id="savings">₦500</p>
-  </div>
+<br><br>
 
-  <div class="card">
-    <button onclick="earn()">Earn ₦100</button>
-    <button onclick="save()">Save ₦100</button>
-    <button onclick="bonus()">Weekly Bonus</button>
-  </div>
+<!-- 🔐 Forgot Password -->
+<button onclick="resetPassword()">Forgot Password?</button>
 
-</div>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <script>
-let balance = 1000;
-let savings = 500;
+const firebaseConfig = {
+  apiKey: "AIzaSyADD6zb-bPiW1zUd3k6luEe2Bz7_n5xPBg",
+  authDomain: "skyvest-student-hub.firebaseapp.com",
+  projectId: "skyvest-student-hub",
+  storageBucket: "skyvest-student-hub.firebasestorage.app",
+  messagingSenderId: "941265501695",
+  appId: "1:941265501695:web:6aa43e2e09caacd335bbca"
+};
 
-function updateUI() {
-  document.getElementById("balance").innerText = "₦" + balance;
-  document.getElementById("savings").innerText = "₦" + savings;
-}
+firebase.initializeApp(firebaseConfig);
 
-function earn() {
-  balance += 100;
-  updateUI();
-}
+const auth = firebase.auth();
 
-function save() {
-  if(balance >= 100){
-    balance -= 100;
-    savings += 100;
-    updateUI();
+function login(){
+  let email = document.getElementById("email").value;
+  let password = document.getElementById("password").value;
+
+  if(email === "" || password === ""){
+    alert("Fill all fields");
+    return;
   }
+
+  auth.signInWithEmailAndPassword(email, password)
+  .then(() => {
+    alert("Login successful");
+    window.location.href = "dashboard.html";
+  })
+  .catch(err => {
+    alert("Login failed: " + err.message);
+  });
 }
 
-function bonus() {
-  let bonus = savings * 0.02;
-  balance += bonus;
-  updateUI();
-}
+function resetPassword(){
+  let email = document.getElementById("email").value;
 
+  if(!email){
+    alert("Enter your email first");
+    return;
+  }
+
+  auth.sendPasswordResetEmail(email)
+  .then(() => {
+    alert("Password reset email sent");
+  })
+  .catch(err => {
+    alert("Error: " + err.message);
+  });
+}
 </script>
 
 </body>

@@ -1,49 +1,402 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Skyvest Dashboard</title>
+
+  <!-- FONT -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- AOS SCROLL ANIMATION -->
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:'Poppins',sans-serif;
+    }
+
+    body{
+      background:#050816;
+      color:white;
+      overflow-x:hidden;
+    }
+
+    /* PARALLAX BACKGROUND */
+    .bg{
+      position:fixed;
+      width:100%;
+      height:100%;
+      top:0;
+      left:0;
+      z-index:-3;
+      background:
+      radial-gradient(circle at top left,#1f3fff55,transparent 25%),
+      radial-gradient(circle at bottom right,#00c3ff33,transparent 30%),
+      linear-gradient(to bottom,#040816,#081120,#050816);
+    }
+
+    .floating{
+      position:fixed;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      z-index:-2;
+    }
+
+    .bubble{
+      position:absolute;
+      bottom:-100px;
+      background:rgba(255,255,255,0.08);
+      border-radius:50%;
+      animation:float 20s infinite linear;
+      backdrop-filter:blur(5px);
+    }
+
+    .bubble:nth-child(1){
+      width:120px;
+      height:120px;
+      left:10%;
+      animation-duration:18s;
+    }
+
+    .bubble:nth-child(2){
+      width:80px;
+      height:80px;
+      left:30%;
+      animation-duration:25s;
+    }
+
+    .bubble:nth-child(3){
+      width:150px;
+      height:150px;
+      left:55%;
+      animation-duration:22s;
+    }
+
+    .bubble:nth-child(4){
+      width:90px;
+      height:90px;
+      left:80%;
+      animation-duration:19s;
+    }
+
+    @keyframes float{
+      0%{
+        transform:translateY(0) rotate(0deg);
+      }
+      100%{
+        transform:translateY(-120vh) rotate(360deg);
+      }
+    }
+
+    .hero{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      text-align:center;
+      padding:30px;
+      position:relative;
+    }
+
+    .hero h1{
+      font-size:60px;
+      font-weight:700;
+      background:linear-gradient(to right,#00c6ff,#0072ff,#00f2fe);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      animation:glow 2s infinite alternate;
+    }
+
+    @keyframes glow{
+      from{
+        text-shadow:0 0 10px #00c3ff;
+      }
+      to{
+        text-shadow:0 0 30px #0072ff;
+      }
+    }
+
+    .hero p{
+      margin-top:15px;
+      color:#cfd9ff;
+      max-width:700px;
+      line-height:1.7;
+    }
+
+    .container{
+      width:95%;
+      max-width:1200px;
+      margin:auto;
+      padding-bottom:100px;
+    }
+
+    .glass{
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.15);
+      backdrop-filter:blur(15px);
+      border-radius:25px;
+      padding:25px;
+      margin-bottom:30px;
+      box-shadow:0 10px 40px rgba(0,0,0,0.4);
+      transition:0.4s;
+      transform-style:preserve-3d;
+    }
+
+    .glass:hover{
+      transform:translateY(-10px) rotateX(3deg) rotateY(3deg);
+      box-shadow:0 20px 60px rgba(0,114,255,0.3);
+    }
+
+    .top-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+      gap:20px;
+    }
+
+    .card{
+      padding:25px;
+      border-radius:20px;
+      background:linear-gradient(135deg,rgba(255,255,255,0.12),rgba(255,255,255,0.03));
+      position:relative;
+      overflow:hidden;
+    }
+
+    .card::before{
+      content:'';
+      position:absolute;
+      width:200px;
+      height:200px;
+      background:rgba(255,255,255,0.08);
+      border-radius:50%;
+      top:-120px;
+      right:-120px;
+    }
+
+    .card h3{
+      font-size:18px;
+      color:#cfd9ff;
+    }
+
+    .amount{
+      font-size:38px;
+      font-weight:700;
+      margin-top:10px;
+    }
+
+    .btn-group{
+      display:flex;
+      flex-wrap:wrap;
+      gap:15px;
+      margin-top:20px;
+    }
+
+    button{
+      padding:15px 25px;
+      border:none;
+      border-radius:14px;
+      background:linear-gradient(135deg,#0072ff,#00c6ff);
+      color:white;
+      font-weight:600;
+      cursor:pointer;
+      transition:0.3s;
+      box-shadow:0 10px 20px rgba(0,114,255,0.3);
+    }
+
+    button:hover{
+      transform:translateY(-5px) scale(1.03);
+      box-shadow:0 15px 35px rgba(0,114,255,0.5);
+    }
+
+    input{
+      width:100%;
+      padding:16px;
+      border:none;
+      outline:none;
+      border-radius:14px;
+      background:rgba(255,255,255,0.08);
+      color:white;
+      margin-top:15px;
+      border:1px solid rgba(255,255,255,0.1);
+    }
+
+    input::placeholder{
+      color:#b8c1ff;
+    }
+
+    .section-title{
+      font-size:28px;
+      margin-bottom:20px;
+      font-weight:700;
+    }
+
+    .history-item{
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.08);
+      padding:15px;
+      border-radius:15px;
+      margin-top:15px;
+      transition:0.3s;
+    }
+
+    .history-item:hover{
+      transform:translateX(8px);
+      background:rgba(0,114,255,0.15);
+    }
+
+    .story-section{
+      padding:80px 0;
+      text-align:center;
+    }
+
+    .story-section h2{
+      font-size:42px;
+      margin-bottom:20px;
+    }
+
+    .story-section p{
+      max-width:850px;
+      margin:auto;
+      line-height:1.9;
+      color:#d9e2ff;
+    }
+
+    .footer{
+      text-align:center;
+      padding:40px;
+      color:#aab7ff;
+    }
+
+    @media(max-width:768px){
+
+      .hero h1{
+        font-size:40px;
+      }
+
+      .amount{
+        font-size:28px;
+      }
+
+    }
+  </style>
 </head>
 <body>
 
-<h2>Skyvest Dashboard</h2>
+<div class="bg"></div>
 
-<p>Balance: ₦<span id="balance">0</span></p>
-<p>Savings: ₦<span id="savings">0</span></p>
+<div class="floating">
+  <div class="bubble"></div>
+  <div class="bubble"></div>
+  <div class="bubble"></div>
+  <div class="bubble"></div>
+</div>
 
-<button onclick="earn()">Earn ₦100</button>
-<button onclick="save()">Save ₦100</button>
+<!-- HERO -->
+<section class="hero">
+  <h1 data-aos="zoom-in">Skyvest Dashboard</h1>
 
-<br><br>
+  <p data-aos="fade-up">
+    Experience the future of digital investment with immersive visuals,
+    smooth interactions, intelligent savings systems, and a premium
+    financial environment built for growth.
+  </p>
+</section>
 
-<h3>Request Support</h3>
-<input type="number" id="supportAmount" placeholder="Amount"><br><br>
-<input type="text" id="supportReason" placeholder="Reason"><br><br>
-<button onclick="requestSupport()">Submit Request</button>
+<div class="container">
 
-<br><br>
+  <!-- BALANCE -->
+  <div class="top-grid">
 
-<!-- 💰 INTEREST SYSTEM -->
-<h3>Interest System</h3>
-<button onclick="applyInterest()">Apply Weekly Interest (10%)</button>
+    <div class="glass card" data-aos="fade-right">
+      <h3>Current Balance</h3>
+      <div class="amount">₦<span id="balance">0</span></div>
+    </div>
 
-<br><br>
+    <div class="glass card" data-aos="fade-left">
+      <h3>Total Savings</h3>
+      <div class="amount">₦<span id="savings">0</span></div>
+    </div>
 
-<h3>Transaction History</h3>
-<div id="history"></div>
+  </div>
 
-<br>
+  <!-- ACTIONS -->
+  <div class="glass" data-aos="fade-up">
 
-<button onclick="goAdmin()">Admin Panel</button>
+    <div class="section-title">Financial Actions</div>
 
-<br><br>
-<button onclick="logout()">Logout</button>
+    <div class="btn-group">
+      <button onclick="earn()">Earn ₦100</button>
+      <button onclick="save()">Save ₦100</button>
+      <button onclick="applyInterest()">Apply Weekly Interest (10%)</button>
+      <button onclick="goAdmin()">Admin Panel</button>
+      <button onclick="logout()">Logout</button>
+    </div>
+
+  </div>
+
+  <!-- SUPPORT -->
+  <div class="glass" data-aos="zoom-in-up">
+
+    <div class="section-title">Request Support</div>
+
+    <input type="number" id="supportAmount" placeholder="Amount">
+    <input type="text" id="supportReason" placeholder="Reason">
+
+    <div class="btn-group">
+      <button onclick="requestSupport()">Submit Request</button>
+    </div>
+
+  </div>
+
+  <!-- STORY -->
+  <section class="story-section" data-aos="fade-up">
+
+    <h2>The Skyvest Journey</h2>
+
+    <p>
+      Skyvest is more than a dashboard. It is a digital financial ecosystem
+      crafted to inspire confidence, discipline, and wealth growth.
+      Every interaction is designed with motion, depth, storytelling,
+      and futuristic visual experiences to make users feel connected
+      to their financial future.
+    </p>
+
+  </section>
+
+  <!-- TRANSACTION -->
+  <div class="glass" data-aos="fade-up">
+
+    <div class="section-title">Transaction History</div>
+
+    <div id="history"></div>
+
+  </div>
+
+</div>
+
+<div class="footer">
+  Skyvest © 2026 • Smart Investment Experience
+</div>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
+<!-- AOS -->
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+
 <script>
+AOS.init({
+  duration:1200,
+  once:false
+});
+
 const firebaseConfig = {
   apiKey: "AIzaSyADD6zb-bPiW1zUd3k6luEe2Bz7_n5xPBg",
   authDomain: "skyvest-student-hub.firebaseapp.com",
@@ -107,6 +460,7 @@ function save(){
     let savings = doc.data().savings;
 
     if(balance >= 100){
+
       ref.update({
         balance: balance - 100,
         savings: savings + 100
@@ -123,6 +477,7 @@ function save(){
       document.getElementById("savings").innerText = savings + 100;
 
       loadHistory();
+
     } else {
       alert("Not enough balance");
     }
@@ -130,6 +485,7 @@ function save(){
 }
 
 function requestSupport(){
+
   let amount = document.getElementById("supportAmount").value;
   let reason = document.getElementById("supportReason").value;
 
@@ -162,12 +518,14 @@ function requestSupport(){
 }
 
 function applyInterest(){
+
   let ref = db.collection("users").doc(currentUser.uid);
 
   ref.get().then(doc => {
+
     let savings = doc.data().savings || 0;
 
-    let interest = savings * 0.10; // 10% interest
+    let interest = savings * 0.10;
     let newSavings = savings + interest;
 
     ref.update({
@@ -186,23 +544,27 @@ function applyInterest(){
 
     loadUser(currentUser.uid);
     loadHistory();
+
   });
 }
 
 function loadHistory(){
+
   let container = document.getElementById("history");
+
   container.innerHTML = "";
 
   db.collection("transactions")
-  .where("userId", "==", currentUser.uid)
+  .where("userId","==",currentUser.uid)
   .get()
   .then(snapshot => {
 
     snapshot.forEach(doc => {
+
       let data = doc.data();
 
       container.innerHTML += `
-        <div style="border:1px solid gray; padding:5px; margin:5px;">
+        <div class="history-item">
           <b>${data.type}</b> - ₦${data.amount}
         </div>
       `;
@@ -212,7 +574,10 @@ function loadHistory(){
 }
 
 function goAdmin(){
-  let email = currentUser.email ? currentUser.email.toLowerCase() : "";
+
+  let email = currentUser.email
+  ? currentUser.email.toLowerCase()
+  : "";
 
   if(email === "skyvestcapital.ng@gmail.com"){
     window.location.href = "admin.html";
@@ -226,6 +591,16 @@ function logout(){
     window.location.href = "login.html";
   });
 }
+
+/* PARALLAX EFFECT */
+window.addEventListener("scroll", () => {
+
+  let scroll = window.pageYOffset;
+
+  document.querySelector(".bg").style.transform =
+  "translateY(" + scroll * 0.3 + "px)";
+
+});
 </script>
 
 </body>

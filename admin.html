@@ -1,24 +1,413 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Admin Panel</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Skyvest Admin Panel</title>
+
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- AOS -->
+<link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
+}
+
+body{
+  min-height:100vh;
+  overflow-x:hidden;
+  background:#06111d;
+  color:white;
+  position:relative;
+}
+
+/* BACKGROUND */
+.bg{
+  position:fixed;
+  width:100%;
+  height:100%;
+  top:0;
+  left:0;
+  z-index:-5;
+  background:
+  radial-gradient(circle at top left,#00b7ff33,transparent 25%),
+  radial-gradient(circle at bottom right,#00ff9950,transparent 25%),
+  linear-gradient(to bottom,#06111d,#081827,#06111d);
+}
+
+/* FLOATING BALLS */
+.floating{
+  position:fixed;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  z-index:-4;
+}
+
+.ball{
+  position:absolute;
+  border-radius:50%;
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(5px);
+  animation:float 20s infinite linear;
+}
+
+.ball:nth-child(1){
+  width:180px;
+  height:180px;
+  left:10%;
+  top:90%;
+}
+
+.ball:nth-child(2){
+  width:120px;
+  height:120px;
+  left:75%;
+  top:85%;
+  animation-duration:26s;
+}
+
+.ball:nth-child(3){
+  width:90px;
+  height:90px;
+  left:45%;
+  top:95%;
+  animation-duration:18s;
+}
+
+.ball:nth-child(4){
+  width:220px;
+  height:220px;
+  left:85%;
+  top:100%;
+  animation-duration:30s;
+}
+
+@keyframes float{
+  0%{
+    transform:translateY(0) rotate(0deg);
+  }
+  100%{
+    transform:translateY(-130vh) rotate(360deg);
+  }
+}
+
+/* HEADER */
+.hero{
+  padding:80px 20px 40px;
+  text-align:center;
+}
+
+.hero h1{
+  font-size:58px;
+  font-weight:700;
+  background:linear-gradient(to right,#00b7ff,#00ff99);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:glow 2s infinite alternate;
+}
+
+@keyframes glow{
+  from{
+    text-shadow:0 0 10px #00b7ff;
+  }
+  to{
+    text-shadow:0 0 30px #00ff99;
+  }
+}
+
+.hero p{
+  margin-top:15px;
+  color:#cfdfff;
+  max-width:750px;
+  margin-inline:auto;
+  line-height:1.8;
+}
+
+/* MAIN */
+.container{
+  width:95%;
+  max-width:1200px;
+  margin:auto;
+  padding-bottom:80px;
+}
+
+/* GLASS */
+.glass{
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.1);
+  backdrop-filter:blur(15px);
+  border-radius:28px;
+  padding:30px;
+  margin-bottom:30px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.35);
+  transition:0.4s;
+  transform-style:preserve-3d;
+}
+
+.glass:hover{
+  transform:translateY(-10px) rotateX(3deg) rotateY(3deg);
+  box-shadow:0 30px 70px rgba(0,183,255,0.25);
+}
+
+.section-title{
+  font-size:30px;
+  margin-bottom:20px;
+  font-weight:700;
+}
+
+/* STATUS */
+.status-box{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:20px;
+}
+
+#status{
+  font-size:18px;
+  color:#dff7ff;
+}
+
+/* BUTTON */
+button{
+  padding:15px 35px;
+  border:none;
+  border-radius:16px;
+  background:linear-gradient(135deg,#00b7ff,#00ff99);
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.35s;
+  box-shadow:0 10px 25px rgba(0,183,255,0.3);
+}
+
+button:hover{
+  transform:translateY(-5px) scale(1.03);
+  box-shadow:0 18px 40px rgba(0,255,153,0.35);
+}
+
+/* REQUEST GRID */
+.requests-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:20px;
+}
+
+/* REQUEST CARD */
+.request-card{
+  position:relative;
+  overflow:hidden;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:24px;
+  padding:25px;
+  transition:0.4s;
+}
+
+.request-card::before{
+  content:'';
+  position:absolute;
+  width:180px;
+  height:180px;
+  background:rgba(255,255,255,0.05);
+  border-radius:50%;
+  top:-80px;
+  right:-80px;
+}
+
+.request-card:hover{
+  transform:translateY(-8px) scale(1.02);
+  background:rgba(0,183,255,0.1);
+}
+
+.request-card h3{
+  font-size:20px;
+  margin-bottom:15px;
+  color:#ffffff;
+}
+
+.request-card p{
+  margin:12px 0;
+  line-height:1.7;
+  color:#d7e9ff;
+}
+
+.badge{
+  display:inline-block;
+  margin-top:10px;
+  padding:8px 16px;
+  border-radius:30px;
+  font-size:13px;
+  font-weight:600;
+  background:rgba(0,255,153,0.15);
+  border:1px solid rgba(0,255,153,0.4);
+  color:#80ffc7;
+}
+
+/* STORY SECTION */
+.story{
+  text-align:center;
+  padding:40px 20px;
+}
+
+.story h2{
+  font-size:40px;
+  margin-bottom:20px;
+}
+
+.story p{
+  max-width:850px;
+  margin:auto;
+  line-height:1.9;
+  color:#d7e9ff;
+}
+
+/* FOOTER */
+.footer{
+  text-align:center;
+  padding:40px;
+  color:#9ab8d0;
+}
+
+/* MOBILE */
+@media(max-width:768px){
+
+  .hero h1{
+    font-size:40px;
+  }
+
+  .section-title{
+    font-size:24px;
+  }
+
+}
+
+</style>
 </head>
+
 <body>
 
-<h2>Admin Panel</h2>
+<div class="bg"></div>
 
-<p id="status">Loading...</p>
+<div class="floating">
+  <div class="ball"></div>
+  <div class="ball"></div>
+  <div class="ball"></div>
+  <div class="ball"></div>
+</div>
 
-<h3>Support Requests</h3>
-<div id="requests"></div>
+<!-- HERO -->
+<section class="hero">
 
-<button onclick="logout()">Logout</button>
+  <h1 data-aos="zoom-in">Skyvest Admin</h1>
 
+  <p data-aos="fade-up">
+    Monitor support requests, oversee the investment ecosystem,
+    and manage the Skyvest financial network with immersive visuals,
+    glassmorphism design, and futuristic dashboard experiences.
+  </p>
+
+</section>
+
+<div class="container">
+
+  <!-- STATUS -->
+  <div class="glass" data-aos="fade-up">
+
+    <div class="status-box">
+
+      <div>
+        <div class="section-title">Admin Status</div>
+        <p id="status">Loading...</p>
+      </div>
+
+      <button onclick="logout()">Logout</button>
+
+    </div>
+
+  </div>
+
+  <!-- STORY -->
+  <div class="story" data-aos="fade-up">
+
+    <h2>Financial Oversight Experience</h2>
+
+    <p>
+      The Skyvest Admin Panel is designed to create a futuristic
+      monitoring environment where financial operations, support
+      requests, and ecosystem management feel immersive, smooth,
+      and intelligently connected.
+    </p>
+
+  </div>
+
+  <!-- REQUESTS -->
+  <div class="glass" data-aos="zoom-in-up">
+
+    <div class="section-title">Support Requests</div>
+
+    <div class="requests-grid" id="requests"></div>
+
+  </div>
+
+</div>
+
+<div class="footer">
+  Skyvest Admin System © 2026
+</div>
+
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
+<!-- AOS -->
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+
 <script>
+
+/* AOS */
+AOS.init({
+  duration:1200
+});
+
+/* PARALLAX EFFECT */
+window.addEventListener("mousemove",(e)=>{
+
+  let x = (window.innerWidth - e.pageX * 2) / 120;
+  let y = (window.innerHeight - e.pageY * 2) / 120;
+
+  document.querySelectorAll(".glass").forEach(card=>{
+
+    card.style.transform =
+    `rotateY(${x}deg) rotateX(${y}deg)`;
+
+  });
+
+});
+
+/* RESET */
+window.addEventListener("mouseleave",()=>{
+
+  document.querySelectorAll(".glass").forEach(card=>{
+
+    card.style.transform =
+    `rotateY(0deg) rotateX(0deg)`;
+
+  });
+
+});
+
 const firebaseConfig = {
   apiKey: "AIzaSyADD6zb-bPiW1zUd3k6luEe2Bz7_n5xPBg",
   authDomain: "skyvest-student-hub.firebaseapp.com",
@@ -32,7 +421,7 @@ const db = firebase.firestore();
 
 const ADMIN_EMAIL = "skyvestcapital.ng@gmail.com";
 
-// 🔥 AUTH CHECK
+/* AUTH CHECK */
 auth.onAuthStateChanged(user => {
 
   if(!user){
@@ -41,56 +430,111 @@ auth.onAuthStateChanged(user => {
   }
 
   if(user.email !== ADMIN_EMAIL){
-    document.body.innerHTML = "<h2>Access Denied</h2>";
+
+    document.body.innerHTML = `
+      <div style="
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+      font-size:40px;
+      font-weight:bold;
+      color:white;">
+      Access Denied
+      </div>
+    `;
+
     return;
   }
 
-  document.getElementById("status").innerText = "Welcome Admin: " + user.email;
+  document.getElementById("status").innerText =
+  "Welcome Admin: " + user.email;
 
   loadRequests();
+
 });
 
-// 🔥 LOAD SUPPORT REQUESTS
+/* LOAD SUPPORT REQUESTS */
 function loadRequests(){
+
   const container = document.getElementById("requests");
+
   container.innerHTML = "Loading...";
 
   db.collection("support_requests")
+
   .get()
+
   .then(snapshot => {
 
     if(snapshot.empty){
-      container.innerHTML = "<p>No requests found</p>";
+
+      container.innerHTML = `
+        <div class="request-card">
+          <h3>No Requests</h3>
+          <p>No support requests found.</p>
+        </div>
+      `;
+
       return;
     }
 
     container.innerHTML = "";
 
     snapshot.forEach(doc => {
+
       let data = doc.data();
 
       container.innerHTML += `
-        <div style="border:1px solid #ccc; padding:10px; margin:10px;">
+
+        <div class="request-card" data-aos="fade-up">
+
+          <h3>Support Request</h3>
+
           <p><b>User:</b> ${data.userId}</p>
+
           <p><b>Amount:</b> ₦${data.amount}</p>
+
           <p><b>Reason:</b> ${data.reason}</p>
-          <p><b>Status:</b> ${data.status}</p>
+
+          <div class="badge">
+            ${data.status}
+          </div>
+
         </div>
+
       `;
+
     });
 
   })
+
   .catch(err => {
+
     console.log(err);
-    container.innerHTML = "Error loading requests";
+
+    container.innerHTML = `
+      <div class="request-card">
+        <h3>Error</h3>
+        <p>Error loading requests.</p>
+      </div>
+    `;
+
   });
+
 }
 
+/* LOGOUT */
 function logout(){
+
   auth.signOut().then(()=>{
+
     window.location.href = "index.html";
+
   });
+
 }
+
 </script>
 
 </body>
